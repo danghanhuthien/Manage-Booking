@@ -245,7 +245,7 @@ let USER=null, CUR_SHEET=null, HEADERS=[], ALL_ROWS=[], FILTERED=[], EDIT_ID=nul
 // ── PHÂN QUYỀN ────────────────────────────────
 // null = Admin không giới hạn
 const PERMISSIONS = {
-  "Sale":  ["BOOKING CODE","Ngày đến","Số đêm","PAX","Ngủ BKK trước",
+  "Sale":  ["BOOKING CODE","Ngày đến","Ngày đi","Số đêm","PAX","Ngủ BKK trước",
             "TWN","DBL","SGL","TRP","GUIDE ROOM","ARR No.","Time","NOTE","File"],
   "OP":    ["Final","PTTY Hotel","BKK Hotel"],
   "Xe":    ["Bus","Seat","TT Tài xế"],
@@ -258,7 +258,7 @@ const PERMISSIONS = {
 const SKIP_INPUT = ["No.","SALE"];
 
 const AUTO_READONLY = [
-  "Trạng thái","Nhắc nhở","Ngày đi",
+  "Trạng thái","Nhắc nhở",
   "Nội dung booking ks PTTY","Nội dung booking khách sạn BKK"
 ];
 
@@ -270,7 +270,7 @@ const ROOM_COLS = [
 
 const CHECKBOX_COLS = ["Ngủ BKK trước","Final"];
 const NUMBER_COLS   = ["Số đêm","PAX","TWN","DBL","SGL","TRP","GUIDE ROOM"];
-const DATE_COLS     = ["Ngày đến"];
+const DATE_COLS     = ["Ngày đến","Ngày đi"];
 
 // ── SECTIONS form (tất cả field nhập liệu) ────
 const SECTIONS = [
@@ -278,7 +278,7 @@ const SECTIONS = [
     title:"Thông tin chuyến",
     icon:`<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`,
     layout:"grid2",
-    fields:["BOOKING CODE","Ngày đến","Số đêm","PAX","Ngủ BKK trước","GUIDE","ARR No.","Time"]
+    fields:["BOOKING CODE","Ngày đến","Ngày đi","Số đêm","PAX","Ngủ BKK trước","GUIDE","ARR No.","Time"]
   },
   {
     title:"Loại phòng",
@@ -443,10 +443,6 @@ function buildForm(row) {
       <div class="info-item">
         <label>Nhắc nhở</label>
         <span class="${gv('Nhắc nhở')?'':'muted'}">${gv('Nhắc nhở')||'—'}</span>
-      </div>
-      <div class="info-item">
-        <label>Ngày đi</label>
-        <span class="${gv('Ngày đi')?'':'muted'}">${gv('Ngày đi')||'—'}</span>
       </div>
     </div>
   </div>`;
