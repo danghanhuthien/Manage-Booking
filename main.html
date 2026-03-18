@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking System</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #181c25;
+      --surface2: #1e2330;
+      --surface3: #232838;
+      --border: rgba(255,255,255,0.07);
+      --border-focus: rgba(99,179,237,0.5);
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-dim: #9ca3af;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59,130,246,0.15);
+      --accent-hover: #2563eb;
+      --danger: #ef4444;
+      --danger-soft: rgba(239,68,68,0.1);
+      --success: #10b981;
+      --success-soft: rgba(16,185,129,0.1);
+      --warning: #f59e0b;
+      --warning-soft: rgba(245,158,11,0.1);
+      --navbar-h: 56px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      height: var(--navbar-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: -0.2px;
+    }
+
+    .nav-brand-icon {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 12px rgba(59,130,246,0.3);
+    }
+
+    .nav-brand-icon svg { width: 16px; height: 16px; stroke: white; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+    .nav-divider { width: 1px; height: 20px; background: var(--border); }
+
+    .month-tabs { display: flex; gap: 4px; flex: 1; overflow-x: auto; }
+    .month-tabs::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      padding: 5px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { background: var(--surface2); color: var(--text); }
+    .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    .nav-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+
+    .user-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 13px;
+    }
+
+    .role-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      font-family: 'DM Mono', monospace;
+    }
+    .role-Admin  { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .role-Sale   { background: rgba(16,185,129,0.15); color: #34d399; }
+    .role-OP     { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .role-Xe     { background: rgba(139,92,246,0.15); color: #a78bfa; }
+
+    .btn-icon {
+      width: 32px; height: 32px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .btn-icon:hover { background: var(--surface2); color: var(--text); }
+    .btn-icon svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .search-wrap { position: relative; flex: 1; max-width: 280px; }
+    .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; stroke: var(--text-muted); stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+
+    .search-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 10px 7px 32px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+    .row-count { font-size: 12px; color: var(--text-muted); font-family: 'DM Mono', monospace; margin-left: auto; }
+
+    .btn-add {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+      white-space: nowrap;
+    }
+    .btn-add:hover { background: var(--accent-hover); box-shadow: 0 2px 12px rgba(59,130,246,0.3); }
+    .btn-add svg { width: 14px; height: 14px; stroke: white; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+    }
+
+    table { border-collapse: separate; border-spacing: 0; font-size: 12px; width: 100%; }
+
+    thead tr th {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--surface2);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    thead tr th:first-child { width: 40px; }
+
+    tbody tr {
+      transition: background 0.1s;
+      cursor: pointer;
+      animation: rowIn 0.2s ease both;
+    }
+    @keyframes rowIn { from { opacity: 0; } to { opacity: 1; } }
+
+    tbody tr:hover td { background: var(--surface2); }
+
+    tbody tr td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    tbody tr td:first-child { text-align: center; color: var(--accent); font-size: 14px; }
+
+    .cell-bool-true  { color: var(--success); }
+    .cell-bool-false { color: transparent; }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: 'DM Mono', monospace;
+    }
+    .status-done    { background: var(--success-soft); color: var(--success); }
+    .status-pending { background: var(--warning-soft); color: var(--warning); }
+
+    /* Empty state */
+    .empty-state {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; color: var(--text-muted); font-size: 13px;
+    }
+    .empty-state svg { width: 36px; height: 36px; stroke: var(--border); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Loading */
+    .loading-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(15,17,23,0.7);
+      z-index: 20;
+    }
+    .loading-overlay.hidden { display: none; }
+    .spin { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── DRAWER ── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      display: none;
+      backdrop-filter: blur(2px);
+    }
+    .overlay.show { display: block; }
+
+    .drawer {
+      position: fixed; top: 0; right: -480px; width: 440px; height: 100%;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      box-shadow: -8px 0 32px rgba(0,0,0,0.4);
+      z-index: 201;
+      display: flex; flex-direction: column;
+      transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .drawer.open { right: 0; }
+
+    .drawer-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .drawer-head h6 {
+      font-size: 13px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-dim);
+    }
+
+    .drawer-body {
+      flex: 1; overflow-y: auto; padding: 20px;
+    }
+    .drawer-body::-webkit-scrollbar { width: 4px; }
+    .drawer-body::-webkit-scrollbar-track { background: transparent; }
+    .drawer-body::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 2px; }
+
+    .drawer-foot {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex; gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Form fields */
+    .field-group {
+      margin-bottom: 14px;
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 11px; font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .field-group input[type="text"],
+    .field-group input[type="number"],
+    .field-group input[type="date"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 11px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field-group input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .field-group input[readonly] {
+      color: var(--text-muted);
+      cursor: default;
+    }
+
+    .field-group input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.5);
+      cursor: pointer;
+    }
+
+    .checkbox-wrap {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 11px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .checkbox-wrap input[type="checkbox"] {
+      width: 15px; height: 15px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .checkbox-wrap span { font-size: 13px; color: var(--text-dim); }
+
+    .section-divider {
+      font-size: 10px; font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 10px 0 6px;
+      border-top: 1px solid var(--border);
+      margin: 6px 0 10px;
+    }
+
+    .readonly-block {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .readonly-block .rb-item label {
+      font-size: 10px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.4px;
+      display: block; margin-bottom: 2px;
+    }
+    .readonly-block .rb-item span {
+      font-size: 12px; color: var(--text);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* Buttons */
+    .btn-save {
+      flex: 1; padding: 9px;
+      background: var(--accent); color: white;
+      border: none; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-save:hover { background: var(--accent-hover); }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-del {
+      padding: 9px 16px;
+      background: var(--danger-soft); color: var(--danger);
+      border: 1px solid rgba(239,68,68,0.2); border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-del:hover { background: rgba(239,68,68,0.2); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      z-index: 999;
+      display: flex; align-items: center; gap: 8px;
+      transform: translateY(80px); opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      max-width: 320px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: rgba(16,185,129,0.3); }
+    .toast.error   { border-color: rgba(239,68,68,0.3); }
+    .toast svg { width: 16px; height: 16px; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    .toast.success svg { stroke: var(--success); }
+    .toast.error   svg { stroke: var(--danger); }
+
+    /* Confirm dialog */
+    .confirm-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 300;
+      display: flex; align-items: center; justify-content: center;
+      display: none;
+      backdrop-filter: blur(4px);
+    }
+    .confirm-backdrop.show { display: flex; }
+    .confirm-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      width: 320px;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+    }
+    .confirm-box h6 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .confirm-box p  { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .confirm-actions { display: flex; gap: 8px; }
+    .confirm-actions button { flex: 1; padding: 9px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: opacity 0.15s; }
+    .confirm-actions button:hover { opacity: 0.85; }
+    .btn-confirm-cancel { background: var(--surface2); color: var(--text); border: 1px solid var(--border) !important; }
+    .btn-confirm-ok     { background: var(--danger); color: white; }
+
+    @media (max-width: 640px) {
+      .drawer { width: 100%; right: -100%; }
+      .nav-brand span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-brand-icon">
+      <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12h6M9 16h4"/></svg>
+    </div>
+    <span>Booking System</span>
+  </div>
+  <div class="nav-divider"></div>
+  <div class="month-tabs" id="month-tabs"></div>
+  <div class="nav-right">
+    <div class="user-chip">
+      <span id="user-name" style="font-size:13px;font-weight:500;"></span>
+      <span class="role-badge" id="user-role-badge"></span>
+    </div>
+    <button class="btn-icon" onclick="handleLogout()" title="Đăng xuất">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" class="search-input" id="search-input" placeholder="Tìm kiếm booking..." oninput="filterTable()">
+  </div>
+  <span class="row-count" id="row-count"></span>
+  <button class="btn-add" id="btn-add" onclick="openDrawerNew()">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Thêm mới
+  </button>
+</div>
+
+<!-- TABLE -->
+<div class="table-wrap" id="table-wrap">
+  <div class="loading-overlay" id="loading"><div class="spin"></div></div>
+  <div class="empty-state hidden" id="empty-state">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span>Không có dữ liệu</span>
+  </div>
+  <table>
+    <thead><tr id="table-head"></tr></thead>
+    <tbody id="table-body"></tbody>
+  </table>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h6 id="drawer-title">Thông tin booking</h6>
+    <button class="btn-icon" onclick="closeDrawer()">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+  <div class="drawer-foot">
+    <button class="btn-save" id="btn-save" onclick="submitForm()">Lưu dữ liệu</button>
+    <button class="btn-del hidden" id="btn-del" onclick="confirmDelete()">Xoá</button>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="confirm-backdrop" id="confirm-backdrop">
+  <div class="confirm-box">
+    <h6>Xác nhận xoá</h6>
+    <p>Booking này sẽ bị xoá vĩnh viễn. Bạn chắc chắn không?</p>
+    <div class="confirm-actions">
+      <button class="btn-confirm-cancel" onclick="closeConfirm()">Huỷ</button>
+      <button class="btn-confirm-ok" onclick="doDelete()">Xoá</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg id="toast-icon" viewBox="0 0 24 24"></svg>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbwgSBotRhoWOkIQ2r-FlVywi4P2bNeus6aQ2tqGy_m2PcNcUN1i3DrxdNjVZSAkXeGH/exec";
+
+// ── STATE ──────────────────────────────────────────────────
+let USER_INFO    = null;
+let CURRENT_SHEET = null;
+let HEADERS      = [];
+let ALL_ROWS     = [];
+let FILTERED     = [];
+let EDIT_ROW_ID  = null; // No. của booking đang sửa
+let EDIT_IDX     = null; // index trong FILTERED
+
+// Cột chỉ đọc (không render vào form nhập)
+const READONLY_COLS = ["No.", "Trạng thái", "Nhắc nhở", "Ngày đi",
+  "Nội dung booking ks PTTY", "Nội dung booking khách sạn BKK",
+  "Ngày check in PTD", "Ngày check out PTD", "Số ngày PTD",
+  "Ngày check in 1", "Ngày check out BKK", "Số ngày 1",
+  "Ngày check in BKK 2", "Ngày check out 2", "Số ngày 2",
+  "SALE"
+];
+
+const CHECKBOX_COLS = ["Ngủ BKK trước", "Final"];
+const NUMBER_COLS   = ["Số đêm", "PAX", "TWN", "DBL", "SGL", "TRP", "GUIDE ROOM"];
+const DATE_COLS     = ["Ngày đến"];
+
+const PERMISSIONS = {
+  "Sale":  ["BOOKING CODE", "Ngày đến", "Số đêm", "PAX", "Ngủ BKK trước",
+            "TWN", "DBL", "SGL", "TRP", "GUIDE ROOM", "ARR No.", "Time", "NOTE", "File"],
+  "OP":    ["Final", "PTTY Hotel", "BKK Hotel"],
+  "Xe":    ["Bus", "Seat", "TT Tài xế"],
+  "Admin": null
+};
+
+// ── INIT ───────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('user');
+  if (!saved) { window.location.href = 'login.html'; return; }
+
+  USER_INFO = JSON.parse(saved);
+  document.getElementById('user-name').textContent = USER_INFO.displayName;
+
+  const badge = document.getElementById('user-role-badge');
+  badge.textContent = USER_INFO.role;
+  badge.className = `role-badge role-${USER_INFO.role}`;
+
+  // Ẩn nút thêm mới nếu không phải Admin/Sale
+  if (USER_INFO.role !== 'Admin' && USER_INFO.role !== 'Sale') {
+    document.getElementById('btn-add').style.display = 'none';
+  }
+
+  loadMonthTabs();
+});
+
+// ── LOGOUT ─────────────────────────────────────────────────
+function handleLogout() {
+  localStorage.removeItem('user');
+  window.location.href = 'login.html';
+}
+
+// ── API CALL ───────────────────────────────────────────────
+async function api(payload) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+  return res.json();
+}
+
+// ── TABS ───────────────────────────────────────────────────
+async function loadMonthTabs() {
+  try {
+    const data = await api({ action: 'getMonthSheets' });
+    const tabs = document.getElementById('month-tabs');
+
+    if (!data.success || !data.sheets.length) {
+      tabs.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">Chưa có dữ liệu</span>';
+      return;
+    }
+
+    tabs.innerHTML = data.sheets.map((s, i) =>
+      `<button class="tab-btn ${i===0?'active':''}" onclick="selectTab('${s}', this)">${s.replace('Data ','')}</button>`
+    ).join('');
+
+    selectTab(data.sheets[0], tabs.querySelector('.tab-btn'));
+  } catch(e) {
+    showToast('Không tải được danh sách tháng', 'error');
+  }
+}
+
+function selectTab(sheetName, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  CURRENT_SHEET = sheetName;
+  loadData();
+}
+
+// ── LOAD DATA ──────────────────────────────────────────────
+async function loadData() {
+  setLoading(true);
+  clearTable();
+
+  try {
+    const data = await api({ action: 'getBookingData', userInfo: USER_INFO, sheetName: CURRENT_SHEET });
+    if (!data.success) { showToast(data.msg, 'error'); return; }
+
+    HEADERS  = data.headers;
+    ALL_ROWS = data.rows;
+    FILTERED = [...ALL_ROWS];
+
+    document.getElementById('search-input').value = '';
+    renderTable();
+  } catch(e) {
+    showToast('Lỗi tải dữ liệu', 'error');
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ── RENDER TABLE ───────────────────────────────────────────
+function renderTable() {
+  // Header
+  document.getElementById('table-head').innerHTML =
+    '<th>✎</th>' + HEADERS.map(h => `<th>${h}</th>`).join('');
+
+  // Body
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = FILTERED.map((row, idx) =>
+    `<tr onclick="openDrawerEdit(${idx})">
+      <td>✎</td>
+      ${row.map((cell, ci) => {
+        const h = (HEADERS[ci] || '').toString().trim();
+        if (typeof cell === 'boolean') {
+          return `<td class="cell-bool-${cell}">${cell ? '✓' : ''}</td>`;
+        }
+        if (h === 'Trạng thái') {
+          const cls = cell === 'DONE' ? 'status-done' : 'status-pending';
+          return `<td><span class="status-badge ${cls}">${cell || ''}</span></td>`;
+        }
+        return `<td>${cell ?? ''}</td>`;
+      }).join('')}
+    </tr>`
+  ).join('');
+
+  // Count
+  document.getElementById('row-count').textContent =
+    `${FILTERED.length} / ${ALL_ROWS.length} booking`;
+
+  // Empty
+  document.getElementById('empty-state').classList.toggle('hidden', FILTERED.length > 0);
+}
+
+// ── SEARCH ─────────────────────────────────────────────────
+function filterTable() {
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  FILTERED = q
+    ? ALL_ROWS.filter(row => row.some(cell => (cell ?? '').toString().toLowerCase().includes(q)))
+    : [...ALL_ROWS];
+  renderTable();
+}
+
+// ── DRAWER NEW ─────────────────────────────────────────────
+function openDrawerNew() {
+  EDIT_ROW_ID = null;
+  EDIT_IDX    = null;
+  document.getElementById('drawer-title').textContent = 'THÊM MỚI BOOKING';
+  document.getElementById('btn-del').classList.add('hidden');
+  buildForm(null);
+  openDrawer();
+}
+
+// ── DRAWER EDIT ────────────────────────────────────────────
+function openDrawerEdit(idx) {
+  EDIT_IDX = idx;
+  const row = FILTERED[idx];
+
+  // Lấy No. để làm rowId
+  const noIdx = HEADERS.findIndex(h => h.toString().trim() === 'No.');
+  EDIT_ROW_ID = noIdx !== -1 ? row[noIdx] : null;
+
+  document.getElementById('drawer-title').textContent = 'CHỈNH SỬA BOOKING';
+  document.getElementById('btn-del').classList.toggle('hidden', USER_INFO.role !== 'Admin');
+  buildForm(row);
+  openDrawer();
+}
+
+// ── BUILD FORM ─────────────────────────────────────────────
+function buildForm(row) {
+  const allowed = PERMISSIONS[USER_INFO.role]; // null = Admin
+  let html = '';
+
+  // Block thông tin chỉ đọc (No., SALE, Trạng thái...)
+  if (row) {
+    const noIdx    = HEADERS.findIndex(h => h.trim() === 'No.');
+    const saleIdx  = HEADERS.findIndex(h => h.trim() === 'SALE');
+    const statIdx  = HEADERS.findIndex(h => h.trim() === 'Trạng thái');
+    html += `<div class="readonly-block">`;
+    if (noIdx   !== -1) html += `<div class="rb-item"><label>No.</label><span>${row[noIdx] ?? ''}</span></div>`;
+    if (saleIdx !== -1) html += `<div class="rb-item"><label>Sale</label><span>${row[saleIdx] ?? ''}</span></div>`;
+    if (statIdx !== -1) html += `<div class="rb-item"><label>Trạng thái</label><span>${row[statIdx] ?? ''}</span></div>`;
+    html += `</div>`;
+  }
+
+  // Các trường nhập liệu
+  HEADERS.forEach((colRaw, i) => {
+    const col = colRaw.toString().trim();
+    if (READONLY_COLS.includes(col)) return;
+
+    // Kiểm tra quyền
+    const canEdit = !allowed || allowed.includes(col);
+    if (!canEdit) return;
+
+    const val = row ? (row[i] ?? '') : '';
+
+    if (CHECKBOX_COLS.includes(col)) {
+      const checked = (val === true || val === 'true') ? 'checked' : '';
+      html += `
+        <div class="field-group">
+          <label>${col}</label>
+          <label class="checkbox-wrap">
+            <input type="checkbox" id="f_${i}" ${checked}>
+            <span>${col === 'Ngủ BKK trước' ? 'Có ngủ BKK trước' : 'Đã Final'}</span>
+          </label>
+        </div>`;
+    } else if (DATE_COLS.includes(col)) {
+      // Convert dd/MM/yyyy → yyyy-MM-dd cho input date
+      let dateVal = '';
+      if (val && typeof val === 'string' && val.includes('/')) {
+        const [d, m, y] = val.split('/');
+        dateVal = `${y}-${m}-${d}`;
+      }
+      html += `
+        <div class="field-group">
+          <label>${col}</label>
+          <input type="date" id="f_${i}" value="${dateVal}">
+        </div>`;
+    } else if (NUMBER_COLS.includes(col)) {
+      html += `
+        <div class="field-group">
+          <label>${col}</label>
+          <input type="number" id="f_${i}" value="${val}" min="0">
+        </div>`;
+    } else {
+      html += `
+        <div class="field-group">
+          <label>${col}</label>
+          <input type="text" id="f_${i}" value="${val}" placeholder="${col}">
+        </div>`;
+    }
+  });
+
+  // Block ngày phòng (readonly, chỉ hiện khi sửa)
+  if (row) {
+    const roomCols = [
+      "Ngày check in PTD","Ngày check out PTD","Số ngày PTD",
+      "Ngày check in 1","Ngày check out BKK","Số ngày 1",
+      "Ngày check in BKK 2","Ngày check out 2","Số ngày 2"
+    ];
+    const hasRoom = roomCols.some(c => {
+      const idx = HEADERS.findIndex(h => h.trim() === c);
+      return idx !== -1 && row[idx];
+    });
+    if (hasRoom) {
+      html += `<div class="section-divider">Lịch phòng (tự tính)</div>`;
+      html += `<div class="readonly-block">`;
+      roomCols.forEach(c => {
+        const idx = HEADERS.findIndex(h => h.trim() === c);
+        if (idx !== -1) {
+          html += `<div class="rb-item"><label>${c}</label><span>${row[idx] ?? '—'}</span></div>`;
+        }
+      });
+      html += `</div>`;
+    }
+  }
+
+  document.getElementById('drawer-body').innerHTML = html;
+}
+
+// ── SUBMIT FORM ────────────────────────────────────────────
+async function submitForm() {
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  btn.textContent = 'Đang lưu...';
+
+  const allowed = PERMISSIONS[USER_INFO.role];
+  const updateData = {};
+
+  HEADERS.forEach((colRaw, i) => {
+    const col = colRaw.toString().trim();
+    if (READONLY_COLS.includes(col)) return;
+    const canEdit = !allowed || allowed.includes(col);
+    if (!canEdit) return;
+
+    const el = document.getElementById(`f_${i}`);
+    if (!el) return;
+
+    let val;
+    if (el.type === 'checkbox') {
+      val = el.checked;
+    } else if (el.type === 'date') {
+      // Convert yyyy-MM-dd → dd/MM/yyyy
+      if (el.value) {
+        const [y, m, d] = el.value.split('-');
+        val = `${d}/${m}/${y}`;
+      } else {
+        val = '';
+      }
+    } else if (el.type === 'number') {
+      val = el.value !== '' ? Number(el.value) : '';
+    } else {
+      val = el.value;
+    }
+
+    updateData[col] = val;
+  });
+
+  try {
+    const res = await api({
+      action: 'saveBooking',
+      userInfo: USER_INFO,
+      sheetName: CURRENT_SHEET,
+      updateData: updateData,
+      rowId: EDIT_ROW_ID
+    });
+
+    showToast(res.msg, res.success ? 'success' : 'error');
+    if (res.success) {
+      closeDrawer();
+      await loadData();
+    }
+  } catch(e) {
+    showToast('Lỗi kết nối server', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Lưu dữ liệu';
+  }
+}
+
+// ── DELETE ─────────────────────────────────────────────────
+function confirmDelete() {
+  document.getElementById('confirm-backdrop').classList.add('show');
+}
+function closeConfirm() {
+  document.getElementById('confirm-backdrop').classList.remove('show');
+}
+async function doDelete() {
+  closeConfirm();
+  try {
+    const res = await api({
+      action: 'deleteBooking',
+      userInfo: USER_INFO,
+      sheetName: CURRENT_SHEET,
+      rowId: EDIT_ROW_ID
+    });
+    showToast(res.msg, res.success ? 'success' : 'error');
+    if (res.success) { closeDrawer(); await loadData(); }
+  } catch(e) {
+    showToast('Lỗi kết nối server', 'error');
+  }
+}
+
+// ── DRAWER HELPERS ─────────────────────────────────────────
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── TABLE HELPERS ──────────────────────────────────────────
+function clearTable() {
+  document.getElementById('table-head').innerHTML = '';
+  document.getElementById('table-body').innerHTML = '';
+  document.getElementById('row-count').textContent = '';
+}
+function setLoading(on) {
+  document.getElementById('loading').classList.toggle('hidden', !on);
+}
+
+// ── TOAST ──────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = 'success') {
+  const t  = document.getElementById('toast');
+  const ic = document.getElementById('toast-icon');
+  document.getElementById('toast-msg').textContent = msg;
+  t.className = `toast ${type}`;
+  ic.innerHTML = type === 'success'
+    ? '<polyline points="20 6 9 17 4 12"/>'
+    : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
