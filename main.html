@@ -503,7 +503,7 @@ function buildForm(row) {
       <div class="info-block"><div class="info-grid3">`;
       ROOM_COLS.forEach(col => {
         const i=HEADERS.findIndex(h=>h.toString().trim()===col);
-        const v=i!==-1?(row[i]??')':'';
+        const v=i!==-1?(row[i]??''):'';
         html += `<div class="info-item"><label>${col}</label><span class="${v?'':'muted'}">${v||'—'}</span></div>`;
       });
       html += `</div></div>`;
